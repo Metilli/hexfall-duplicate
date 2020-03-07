@@ -15,6 +15,7 @@ public class Manager : MonoBehaviour
     public bool isRotating = false;
     public bool isRotatedOnLastDrag = false;
     public bool isExplodedOnRotate = false;
+    public bool isDropping = false;
     public float blocksRotateTime;
 
     public Vector2 rotateStartPosition;
@@ -27,6 +28,7 @@ public class Manager : MonoBehaviour
 
     private System.Random random;
 
+    public List<GameObject> droppingList;
     public float dropTime;
     private float dropHeight;
     public float dropWaitTimePerBlock;
@@ -45,83 +47,82 @@ public class Manager : MonoBehaviour
         highScoreText.text = "High Score: " + PlayerPrefs.GetInt("HighScore").ToString();
     }
 
-
+    private void Update()
+    {
+        if (isDropping)
+        {
+            if (droppingList.Count == 0) isDropping = false;
+        }
+    }
 
 
     public IEnumerator CreateNewBlocks()
     {
         dropHeight = Camera.main.orthographicSize + grid.gridCellDistanceY;
         List<Vector2> emptyGrids = grid.EmptyGridCoordinates();
-        for (int i = 0; i < emptyGrids.Count; i++)
+        for (int i = emptyGrids.Count-1; i >=0; i--)
         {
             yield return new WaitForSeconds(dropWaitTimePerBlock);
 
             Vector2 createPosition = grid.gridPosition[(int)emptyGrids[i].x, (int)emptyGrids[i].y];
             createPosition.y += dropHeight;
-            GameObject hexagonelBlockClone = Instantiate(init.hexagonalBlock, createPosition, Quaternion.Euler(init.hexagonalBlock.transform.rotation.eulerAngles));
+
+            GameObject hexagonelBlockClone = Instantiate(init.hexagonalBlock, createPosition, Quaternion.identity);
+
             hexagonelBlockClone.GetComponent<SpriteRenderer>().color = init.ColorList[random.Next(0, init.ColorList.Count)];
-            hexagonelBlockClone.GetComponent<BlockProperties>().gridCoordinate = new Vector2(emptyGrids[i].x,emptyGrids[i].y);
+            hexagonelBlockClone.GetComponent<BlockProperties>().gridCoordinate = new Vector2(emptyGrids[i].x, emptyGrids[i].y);
             hexagonelBlockClone.GetComponent<BlockProperties>().targetPos = grid.gridPosition[(int)emptyGrids[i].x, (int)emptyGrids[i].y];
+            hexagonelBlockClone.GetComponent<BlockProperties>().LerpTime = 1;
+            droppingList.Add(hexagonelBlockClone);
             grid.gridItems[(int)emptyGrids[i].x, (int)emptyGrids[i].y] = hexagonelBlockClone;
-
-            yield return new WaitForSeconds(0.1f);
-            DropBlockDown(hexagonelBlockClone);
+            isDropping = true;
+            
+            hexagonelBlockClone.GetComponent<BlockProperties>().isDropping = true;
         }
     }
 
 
-    public void DropBlockDown(GameObject hexagonal)
-    {
-        if (hexagonal != null)
-        {
-            int emptyCellCount = grid.EmptyCellCountUnderBlock(hexagonal);
-            if (emptyCellCount > 0)
-            {
-                int x = (int)hexagonal.GetComponent<BlockProperties>().gridCoordinate.x;
-                int y = (int)hexagonal.GetComponent<BlockProperties>().gridCoordinate.y;
-                grid.gridItems[x, y] = null;
-
-                hexagonal.GetComponent<BlockProperties>().gridCoordinate.y += emptyCellCount;
-                grid.gridItems[x, y] = hexagonal;
-
-                hexagonal.GetComponent<BlockProperties>().targetPos = grid.gridPosition[x, y];
-                hexagonal.GetComponent<BlockProperties>().isDropping = true;
-            }
-            else
-            {
-                print("bulunamadı");
-            }
-        }
-    }
-  
 
     public IEnumerator DestroyBlocks(List<GameObject> destroyList)
     {
-        if (destroyList.Count > 0)
+        StartCoroutine(AddScore(destroyList));
+        for (int k = destroyList.Count - 1; k >= 0; k--)
         {
-            yield return StartCoroutine(AddScore(destroyList));
-            for (int k = destroyList.Count - 1; k >= 0; k--)
-            {
-                grid.RemoveHexagonal(destroyList[k]);
-            }
-            List<Vector2> empty = grid.EmptyGridCoordinates();
-            for (int j = grid.CellCountY - 1; j >= 0; j--)
-            {
-                for (int i = 0; i < empty.Count; i++)
-                {
-                    if (grid.gridItems[(int)empty[i].x, j] != null)
-                    {
-                        yield return new WaitForSeconds(0.1f);
-                        DropBlockDown(grid.gridItems[(int)empty[i].x, j]);
-                    }
-                }
-            }
-
-            StartCoroutine(CreateNewBlocks());
+            grid.RemoveHexagonal(destroyList[k]);
         }
-        else yield return null;
+        yield return StartCoroutine(DropBlockDown());
+        StartCoroutine(CreateNewBlocks());
     }
 
+    public IEnumerator DropBlockDown()
+    {
+        GameObject hexagonal;
+        Vector2 targetCoordinate;
+        for (int i = 0; i < grid.CellCountX; i++)
+        {
+            for (int j = grid.CellCountY - 1; j >= 0; j--)
+            {
+                if (grid.gridItems[i, j] != null) hexagonal = grid.gridItems[i, j];
+                else continue;
+
+                targetCoordinate = grid.GetDropCoordinate(hexagonal);
+                if (targetCoordinate == new Vector2(-1, -1)) continue;
+
+                hexagonal.GetComponent<BlockProperties>().targetPos = grid.gridPosition[(int)targetCoordinate.x,(int)targetCoordinate.y];
+                hexagonal.GetComponent<BlockProperties>().gridCoordinate = targetCoordinate;
+                hexagonal.GetComponent<BlockProperties>().LerpTime = 0.5f;
+                droppingList.Add(hexagonal);
+                isDropping = true;
+                hexagonal.GetComponent<BlockProperties>().isDropping = true;
+
+                grid.gridItems[(int)targetCoordinate.x, (int)targetCoordinate.y] = hexagonal;
+                grid.gridItems[i, j] = null;
+                yield return new WaitForSeconds(0.1f);
+            }
+        }
+        yield return null;
+    }
+  
     public List<GameObject> GetBlocksCanExplode(List<GameObject> centerBlocks)
     {
         List<GameObject> blocksCanExplode = new List<GameObject>();
@@ -179,6 +180,24 @@ public class Manager : MonoBehaviour
         for (int i = 0; i < selectedBlocks.Count; i++)
         {
             selectedBlocks[i].transform.parent = hexagonalCenterItemClone.transform;
+        }
+    }
+
+    public void DestroySelectItem()
+    {
+        if (GameObject.FindGameObjectWithTag("selectObject") != null)
+        {
+            selectedBlocks[0].transform.parent = null;
+            selectedBlocks[1].transform.parent = null;
+            selectedBlocks[2].transform.parent = null;
+            Destroy(GameObject.FindGameObjectWithTag("selectObject"));
+        }
+        if (GameObject.FindGameObjectsWithTag("HexagonalShade") != null)
+        {
+            foreach (var item in GameObject.FindGameObjectsWithTag("HexagonalShade"))
+            {
+                Destroy(item);
+            }
         }
     }
 

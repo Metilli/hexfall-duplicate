@@ -18,38 +18,47 @@ public class MyGrid : MonoBehaviour
         gridItems = new GameObject[CellCountX, CellCountY];
     }
 
+    public void AddHexagonal(GameObject hexagonal)
+    {
+
+    }
+
     public void RemoveHexagonal(GameObject hexagonal)
     {
         int x = (int)hexagonal.GetComponent<BlockProperties>().gridCoordinate.x;
         int y = (int)hexagonal.GetComponent<BlockProperties>().gridCoordinate.y;
 
         gridItems[x, y] = null;
-
         Destroy(hexagonal);
     }
 
-    public int EmptyCellCountUnderBlock(GameObject hexagonalBlock)
+    public Vector2 GetDropCoordinate(GameObject hexagonalBlock)
     {
-        int count = 0;
-        int x = (int)hexagonalBlock.GetComponent<BlockProperties>().gridCoordinate.x;
-        int y = (int)hexagonalBlock.GetComponent<BlockProperties>().gridCoordinate.y;
-
-        for (int i = y+1; i <CellCountY; i++)
+        Vector2 DropCoordinate = new Vector2(-1,-1) ;
+        if (hexagonalBlock != null)
         {
-            if (gridItems[x, i] == null) count++;
+            int x = (int)hexagonalBlock.GetComponent<BlockProperties>().gridCoordinate.x;
+            int y = (int)hexagonalBlock.GetComponent<BlockProperties>().gridCoordinate.y;
+
+            for (int i = y; i < CellCountY; i++)
+            {
+                if (gridItems[x, i] == null) DropCoordinate = new Vector2(x, i);
+            }
         }
-        return count;
+        return DropCoordinate;
     }
 
     public List<Vector2> EmptyGridCoordinates()
     {
         List<Vector2> list = new List<Vector2>();
+
         for (int i = 0; i < CellCountX; i++)
         {
-            for (int j = 0; j < CellCountY; j++)
+            for (int j=0; j < CellCountY - 1; j++)
             {
-                if (gridItems[i, j] == null) list.Add(new Vector2(i,j));
+                if (gridItems[i, j] == null) list.Add(new Vector2(i, j));
             }
+
         }
         return list;
     }

@@ -10,14 +10,31 @@ public class BlockProperties : MonoBehaviour
     public bool isDropping;
     public int scoreMultiplier;
     public List<GameObject> TouchingBlocks = new List<GameObject>();
-    float speed = 4.6f;
+    public float LerpTime;
+    public Manager manager;
+    float perc = 0;
+
+    private void Awake()
+    {
+        manager = GameObject.Find("GameManager").GetComponent<Manager>();
+    }
 
     private void Update()
     {
         if (isDropping)
         {
-            transform.position = Vector2.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
-            if (Mathf.Abs(transform.position.y - targetPos.y) < 0.0001f) isDropping = false;
+            perc += Time.deltaTime / LerpTime;
+            if (perc < 1)
+            {
+                transform.position = Vector2.Lerp(transform.position, targetPos, perc);
+            }
+            else
+            {
+                isDropping = false;
+                manager.droppingList.Remove(gameObject);
+                perc = 0;
+            }
+
         }
     }
 

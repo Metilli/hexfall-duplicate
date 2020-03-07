@@ -16,20 +16,20 @@ public class BlockTouchHandler : MonoBehaviour
 
     public void OnMouseDown()
     {
-        if (manager.isRotating == false && manager.isExplodedOnRotate == false)
+        if (manager.isRotating == false && manager.isExplodedOnRotate == false && manager.isDropping == false)
         {
             manager.isRotatedOnLastDrag = false;
             manager.rotateStartPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
-        else if (manager.isRotating == false && manager.isExplodedOnRotate == true)
+        else if (manager.isRotating == false && manager.isExplodedOnRotate == true && manager.isDropping == false)
         {
             manager.isExplodedOnRotate = false;
-            FindNearestThreeBlock(manager.hexagonalCenterItemClone.transform.position);
+            FindNearestThreeBlock(manager.rotateStartPosition);
         }
     }
     private void OnMouseDrag()
     {
-        if (manager.isRotating == false && manager.isExplodedOnRotate == false)
+        if (manager.isRotating == false && manager.isExplodedOnRotate == false && manager.isDropping == false)
         {
             if (manager.selectedBlocks.Count == 3)
             {
@@ -117,7 +117,7 @@ public class BlockTouchHandler : MonoBehaviour
 
     private void OnMouseUp()
     {
-        if (manager.isRotating == false && manager.isRotatedOnLastDrag == false && manager.isExplodedOnRotate == false)
+        if (manager.isRotating == false && manager.isRotatedOnLastDrag == false && manager.isExplodedOnRotate == false && manager.isDropping == false)
         {
             Vector2 worldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
@@ -141,7 +141,7 @@ public class BlockTouchHandler : MonoBehaviour
 
         List<GameObject> selectedObjectCheckList = manager.selectedBlocks;
 
-        if (!manager.selectedBlocks[1].GetComponent<BlockProperties>().TouchingBlocks.Contains(manager.selectedBlocks[2]))
+        while (!manager.selectedBlocks[1].GetComponent<BlockProperties>().TouchingBlocks.Contains(manager.selectedBlocks[2]))
         {
             blocksGo.Remove(manager.selectedBlocks[2]);
             manager.selectedBlocks = blocksGo.OrderBy(go => (go.transform.position - referencePos).sqrMagnitude).Take(3).ToList();
@@ -174,10 +174,11 @@ public class BlockTouchHandler : MonoBehaviour
             List<Vector2> transformEndPositions = getTransformPositions(manager.selectedBlocks);
 
             SetBlockCoordinateOnRotate(manager.selectedBlocks,transformStartPositions, transformEndPositions);
-
-            List<GameObject> blocksWillDestroy = manager.GetBlocksCanExplode(manager.selectedBlocks);
+            List<GameObject> blocksWillDestroy;
+            yield return blocksWillDestroy = manager.GetBlocksCanExplode(manager.selectedBlocks);
             if (blocksWillDestroy.Count > 0)
             {
+                manager.DestroySelectItem();
                 StartCoroutine(manager.DestroyBlocks(blocksWillDestroy));
                 manager.isRotating = false;
                 manager.isExplodedOnRotate = true;
@@ -218,8 +219,13 @@ public class BlockTouchHandler : MonoBehaviour
                 else yPosOffset = -1;
             }
             blocks[i].GetComponent<BlockProperties>().gridCoordinate.y += yPos + yPosOffset;
+            int x = (int)blocks[i].GetComponent<BlockProperties>().gridCoordinate.x;
+            int y = (int)blocks[i].GetComponent<BlockProperties>().gridCoordinate.y;
+
+            grid.gridItems[x, y] = blocks[i];
         }
     }
+
 
     private List<Vector2> getTransformPositions(List<GameObject> blocks)
     {
