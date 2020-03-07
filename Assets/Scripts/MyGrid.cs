@@ -52,9 +52,9 @@ public class MyGrid : MonoBehaviour
     {
         List<Vector2> list = new List<Vector2>();
 
-        for (int i = 0; i < CellCountX; i++)
+        for (int j = 0; j < CellCountY - 1; j++)
         {
-            for (int j=0; j < CellCountY - 1; j++)
+            for (int i = 0; i < CellCountX; i++)
             {
                 if (gridItems[i, j] == null) list.Add(new Vector2(i, j));
             }

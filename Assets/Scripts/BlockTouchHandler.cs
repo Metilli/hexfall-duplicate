@@ -21,15 +21,23 @@ public class BlockTouchHandler : MonoBehaviour
             manager.isRotatedOnLastDrag = false;
             manager.rotateStartPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         }
-        else if (manager.isRotating == false && manager.isExplodedOnRotate == true && manager.isDropping == false)
-        {
+        else if (manager.isRotating == false && manager.isExplodedOnRotate == true && manager.isDropping == false )
+        { 
             manager.isExplodedOnRotate = false;
-            FindNearestThreeBlock(manager.rotateStartPosition);
+            if (manager.selectedBlocks.Count > 0)
+            {
+                for (int i = 0; i < manager.selectedBlocks.Count; i++)
+                {
+                    if (manager.selectedBlocks[i] != null) manager.selectedBlocks[i].transform.parent = null;
+                }
+            }
+            manager.selectedBlocks = manager.FindNearestThreeBlock(manager.rotateStartPosition);
+            manager.CreateSelectItem(manager.selectedBlocks);
         }
     }
     private void OnMouseDrag()
     {
-        if (manager.isRotating == false && manager.isExplodedOnRotate == false && manager.isDropping == false)
+        if (manager.isRotating == false && manager.isExplodedOnRotate == false && manager.isDropping == false )
         {
             if (manager.selectedBlocks.Count == 3)
             {
@@ -123,32 +131,19 @@ public class BlockTouchHandler : MonoBehaviour
             RaycastHit2D hit = Physics2D.Raycast(worldPoint, Vector2.zero);
             if (hit.rigidbody != null)
             {
-                FindNearestThreeBlock(hit.point);
+                if (manager.selectedBlocks.Count > 0)
+                {
+                    for (int i = 0; i < manager.selectedBlocks.Count; i++)
+                    {
+                        if (manager.selectedBlocks[i] != null) manager.selectedBlocks[i].transform.parent = null;
+                    }
+                }
+                manager.selectedBlocks = manager.FindNearestThreeBlock(hit.point);
+                manager.CreateSelectItem(manager.selectedBlocks);
             }
         }
     }
-    private void FindNearestThreeBlock(Vector3 referencePos)
-    {
-        if (manager.selectedBlocks.Count > 0)
-        {
-            for (int i = 0; i < manager.selectedBlocks.Count; i++)
-            {
-                if(manager.selectedBlocks[i] != null) manager.selectedBlocks[i].transform.parent = null;
-            }
-        }
-        List<GameObject> blocksGo = GameObject.FindGameObjectsWithTag("HexagonalBlock").ToList();
-        manager.selectedBlocks = blocksGo.OrderBy(go => (go.transform.position - referencePos).sqrMagnitude).Take(3).ToList();
-
-        List<GameObject> selectedObjectCheckList = manager.selectedBlocks;
-
-        while (!manager.selectedBlocks[1].GetComponent<BlockProperties>().TouchingBlocks.Contains(manager.selectedBlocks[2]))
-        {
-            blocksGo.Remove(manager.selectedBlocks[2]);
-            manager.selectedBlocks = blocksGo.OrderBy(go => (go.transform.position - referencePos).sqrMagnitude).Take(3).ToList();
-        }
-
-        manager.CreateSelectItem(manager.selectedBlocks);
-    }
+    
 
     
     private IEnumerator RotateBlocksAndCheckExplode(RotateDirection direction, float rotateTime)

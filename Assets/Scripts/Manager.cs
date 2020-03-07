@@ -28,10 +28,12 @@ public class Manager : MonoBehaviour
 
     private System.Random random;
 
-    public List<GameObject> droppingList;
-    public float dropTime;
     private float dropHeight;
     public float dropWaitTimePerBlock;
+    public float dropTimeFromTop;
+    public float dropTimeInGrid;
+
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -49,18 +51,59 @@ public class Manager : MonoBehaviour
 
     private void Update()
     {
-        if (isDropping)
-        {
-            if (droppingList.Count == 0) isDropping = false;
-        }
+        
     }
 
+    public IEnumerator DestroyBlocks(List<GameObject> destroyList)
+    {
+        StartCoroutine(AddScore(destroyList));
+        for (int k = destroyList.Count - 1; k >= 0; k--)
+        {
+            grid.RemoveHexagonal(destroyList[k]);
+        }
+        yield return StartCoroutine(DropBlockDown());
+        yield return new WaitForSeconds(dropTimeInGrid/2);
+        yield return StartCoroutine(CreateNewBlocks());
+        yield return new WaitForSeconds(dropTimeFromTop);
+        isDropping = false;
+        yield return StartCoroutine(CheckExplodeAfterDropBlock());
+    }
+
+    public IEnumerator DropBlockDown()
+    {
+        GameObject hexagonal;
+        Vector2 targetCoordinate;
+
+        for (int j = grid.CellCountY - 1; j >= 0; j--)
+        {
+            for (int i = 0; i < grid.CellCountX; i++)
+            {
+                if (grid.gridItems[i, j] != null) hexagonal = grid.gridItems[i, j];
+                else continue;
+
+                targetCoordinate = grid.GetDropCoordinate(hexagonal);
+                if (targetCoordinate == new Vector2(-1, -1)) continue;
+
+                grid.gridItems[(int)targetCoordinate.x, (int)targetCoordinate.y] = hexagonal;
+
+                hexagonal.GetComponent<BlockProperties>().targetPos = grid.gridPosition[(int)targetCoordinate.x,(int)targetCoordinate.y];
+                hexagonal.GetComponent<BlockProperties>().gridCoordinate = targetCoordinate;
+                hexagonal.GetComponent<BlockProperties>().LerpTime = dropTimeInGrid;
+                isDropping = true;
+                hexagonal.GetComponent<BlockProperties>().isDropping = true;
+
+                grid.gridItems[i, j] = null;
+                yield return new WaitForSeconds(dropWaitTimePerBlock);
+            }
+        }
+        yield return null;
+    }
 
     public IEnumerator CreateNewBlocks()
     {
         dropHeight = Camera.main.orthographicSize + grid.gridCellDistanceY;
         List<Vector2> emptyGrids = grid.EmptyGridCoordinates();
-        for (int i = emptyGrids.Count-1; i >=0; i--)
+        for (int i = emptyGrids.Count - 1; i >= 0; i--)
         {
             yield return new WaitForSeconds(dropWaitTimePerBlock);
 
@@ -72,57 +115,49 @@ public class Manager : MonoBehaviour
             hexagonelBlockClone.GetComponent<SpriteRenderer>().color = init.ColorList[random.Next(0, init.ColorList.Count)];
             hexagonelBlockClone.GetComponent<BlockProperties>().gridCoordinate = new Vector2(emptyGrids[i].x, emptyGrids[i].y);
             hexagonelBlockClone.GetComponent<BlockProperties>().targetPos = grid.gridPosition[(int)emptyGrids[i].x, (int)emptyGrids[i].y];
-            hexagonelBlockClone.GetComponent<BlockProperties>().LerpTime = 1;
-            droppingList.Add(hexagonelBlockClone);
+            hexagonelBlockClone.GetComponent<BlockProperties>().LerpTime = dropTimeFromTop;
             grid.gridItems[(int)emptyGrids[i].x, (int)emptyGrids[i].y] = hexagonelBlockClone;
             isDropping = true;
-            
+
             hexagonelBlockClone.GetComponent<BlockProperties>().isDropping = true;
-        }
-    }
-
-
-
-    public IEnumerator DestroyBlocks(List<GameObject> destroyList)
-    {
-        StartCoroutine(AddScore(destroyList));
-        for (int k = destroyList.Count - 1; k >= 0; k--)
-        {
-            grid.RemoveHexagonal(destroyList[k]);
-        }
-        yield return StartCoroutine(DropBlockDown());
-        StartCoroutine(CreateNewBlocks());
-    }
-
-    public IEnumerator DropBlockDown()
-    {
-        GameObject hexagonal;
-        Vector2 targetCoordinate;
-        for (int i = 0; i < grid.CellCountX; i++)
-        {
-            for (int j = grid.CellCountY - 1; j >= 0; j--)
-            {
-                if (grid.gridItems[i, j] != null) hexagonal = grid.gridItems[i, j];
-                else continue;
-
-                targetCoordinate = grid.GetDropCoordinate(hexagonal);
-                if (targetCoordinate == new Vector2(-1, -1)) continue;
-
-                hexagonal.GetComponent<BlockProperties>().targetPos = grid.gridPosition[(int)targetCoordinate.x,(int)targetCoordinate.y];
-                hexagonal.GetComponent<BlockProperties>().gridCoordinate = targetCoordinate;
-                hexagonal.GetComponent<BlockProperties>().LerpTime = 0.5f;
-                droppingList.Add(hexagonal);
-                isDropping = true;
-                hexagonal.GetComponent<BlockProperties>().isDropping = true;
-
-                grid.gridItems[(int)targetCoordinate.x, (int)targetCoordinate.y] = hexagonal;
-                grid.gridItems[i, j] = null;
-                yield return new WaitForSeconds(0.1f);
-            }
         }
         yield return null;
     }
-  
+
+    public IEnumerator CheckExplodeAfterDropBlock()
+    {
+        List<GameObject> destroyList = new List<GameObject>();
+        for (int i = 0; i < grid.CellCountX; i++)
+        {
+            for (int j = 0; j < grid.CellCountY - 1; j++)
+            {
+                Vector3 checkPosition = grid.gridPosition[i, j];
+                checkPosition.y -= grid.gridCellDistanceY / 2;
+                checkPosition.x -= grid.gridCellDistanceX / 2;
+
+                List<GameObject> hexagonalGroup = new List<GameObject>();
+                List<GameObject> blocksWillDestroy = new List<GameObject>();
+
+                hexagonalGroup = FindNearestThreeBlock(checkPosition);
+                blocksWillDestroy = GetBlocksCanExplode(hexagonalGroup);
+
+                destroyList.AddRange(blocksWillDestroy);
+            }
+        }
+        if (destroyList.Count > 0)
+        {
+            StartCoroutine(DestroyBlocks(destroyList));
+            yield return null;
+        }
+        else
+        {
+            selectedBlocks = FindNearestThreeBlock(rotateStartPosition);
+            CreateSelectItem(selectedBlocks);
+            isExplodedOnRotate = false;
+        }
+        yield return null;
+    }
+
     public List<GameObject> GetBlocksCanExplode(List<GameObject> centerBlocks)
     {
         List<GameObject> blocksCanExplode = new List<GameObject>();
@@ -183,6 +218,25 @@ public class Manager : MonoBehaviour
         }
     }
 
+    
+
+    
+
+    public List<GameObject> FindNearestThreeBlock(Vector3 referencePos)
+    {
+        List<GameObject> nearestBlocks = new List<GameObject>();
+
+        List<GameObject> blocksGo = GameObject.FindGameObjectsWithTag("HexagonalBlock").ToList();
+        nearestBlocks = blocksGo.OrderBy(go => (go.transform.position - referencePos).sqrMagnitude).Take(3).ToList();
+
+        while (!nearestBlocks[1].GetComponent<BlockProperties>().TouchingBlocks.Contains(nearestBlocks[2]))
+        {
+            blocksGo.Remove(nearestBlocks[2]);
+            nearestBlocks = blocksGo.OrderBy(go => (go.transform.position - referencePos).sqrMagnitude).Take(3).ToList();
+        }
+        return nearestBlocks;
+    }
+    
     public void DestroySelectItem()
     {
         if (GameObject.FindGameObjectWithTag("selectObject") != null)

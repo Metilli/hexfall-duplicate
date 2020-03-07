@@ -30,11 +30,9 @@ public class BlockProperties : MonoBehaviour
             }
             else
             {
-                isDropping = false;
-                manager.droppingList.Remove(gameObject);
                 perc = 0;
+                isDropping = false;
             }
-
         }
     }
 
