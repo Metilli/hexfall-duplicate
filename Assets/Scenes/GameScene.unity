@@ -318,9 +318,9 @@ MonoBehaviour:
   hexagonalCenterItemClone: {fileID: 0}
   totalMovesText: {fileID: 0}
   dropWaitTimePerBlockFromTop: 0.2
-  dropWaitTimePerBlockInGrid: 0.15
+  dropWaitTimePerBlockInGrid: 0.1
   dropTimeFromTop: 0.75
-  dropTimeInGrid: 0.15
+  dropTimeInGrid: 0.09
   GameOverPanel: {fileID: 2135118405}
 --- !u!4 &361188841
 Transform:

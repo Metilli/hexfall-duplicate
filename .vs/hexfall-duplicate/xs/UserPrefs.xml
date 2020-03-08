@@ -2,10 +2,10 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Manager.cs">
     <Files>
       <File FileName="Assets/Scripts/InitializeLevel.cs" Line="60" Column="1" />
-      <File FileName="Assets/Scripts/BlockTouchHandler.cs" Line="19" Column="91" />
-      <File FileName="Assets/Scripts/Manager.cs" Line="61" Column="41" />
+      <File FileName="Assets/Scripts/BlockTouchHandler.cs" Line="196" Column="46" />
+      <File FileName="Assets/Scripts/Manager.cs" Line="213" Column="17" />
       <File FileName="Assets/Scripts/MyGrid.cs" Line="54" Column="1" />
-      <File FileName="Assets/Scripts/BlockProperties.cs" Line="11" Column="32" />
+      <File FileName="Assets/Scripts/BlockProperties.cs" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -23,7 +23,7 @@
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="34e6079f-5fd5-45e1-a3a1-309a485656d7" />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="06593b73-89f9-42cc-9829-da75bf25cf3f" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Breakpoint file="/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Temp/UnityTempFile-5d53ce8cbd677432db7ef501f24dbdd0" relfile="Temp/UnityTempFile-5d53ce8cbd677432db7ef501f24dbdd0" line="99" column="32" />

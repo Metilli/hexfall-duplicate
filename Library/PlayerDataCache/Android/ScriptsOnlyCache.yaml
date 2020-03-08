@@ -5,20 +5,28 @@ ScriptsOnlyBuild:
     - BlockTouchHandler
     - InitializeLevel
     - Manager
+    - MyGrid
     Unity.2D.Tilemap.Editor.dll:
     - UnityEditor.Tilemaps.GridPaintingState
     - UnityEditor.Tilemaps.GridPaletteBrushes
     - UnityEditor.Tilemaps.GridPalettes
     - UnityEditor.Tilemaps.SceneViewGridManager
     - UnityEditor.Tilemaps.TileDragAndDropManager
+    Unity.TextMeshPro.dll:
+    - TMPro.TMP_FontAsset
+    - TMPro.TMP_Settings
+    - TMPro.TMP_SpriteAsset
+    - TMPro.TMP_StyleSheet
     UnityEditor.TestRunner.dll:
     - UnityEditor.TestTools.TestRunner.Api.CallbacksHolder
     - UnityEditor.TestTools.TestRunner.TestListCacheData
     UnityEngine.UI.dll:
     - UnityEngine.EventSystems.EventSystem
     - UnityEngine.EventSystems.StandaloneInputModule
+    - UnityEngine.UI.Button
     - UnityEngine.UI.CanvasScaler
     - UnityEngine.UI.GraphicRaycaster
+    - UnityEngine.UI.Image
     - UnityEngine.UI.Text
   sceneClasses:
     Assets/Scenes/GameScene.unity:
@@ -30,9 +38,13 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 21
       Script: {instanceID: 0}
+    - Class: 23
+      Script: {instanceID: 0}
     - Class: 28
       Script: {instanceID: 0}
     - Class: 48
+      Script: {instanceID: 0}
+    - Class: 49
       Script: {instanceID: 0}
     - Class: 50
       Script: {instanceID: 0}
@@ -40,26 +52,44 @@ ScriptsOnlyBuild:
       Script: {instanceID: 0}
     - Class: 81
       Script: {instanceID: 0}
+    - Class: 102
+      Script: {instanceID: 0}
     - Class: 104
       Script: {instanceID: 0}
+    - Class: 109
+      Script: {instanceID: 0}
     - Class: 114
-      Script: {instanceID: 9674}
+      Script: {instanceID: 9696}
     - Class: 114
-      Script: {instanceID: 9752}
+      Script: {instanceID: 9774}
     - Class: 114
-      Script: {instanceID: 9838}
+      Script: {instanceID: 9860}
     - Class: 114
-      Script: {instanceID: 10278}
+      Script: {instanceID: 9900}
     - Class: 114
-      Script: {instanceID: 10692}
+      Script: {instanceID: 10300}
     - Class: 114
-      Script: {instanceID: 10830}
+      Script: {instanceID: 10320}
     - Class: 114
-      Script: {instanceID: 11126}
+      Script: {instanceID: 10670}
     - Class: 114
-      Script: {instanceID: 11496}
+      Script: {instanceID: 10714}
     - Class: 114
-      Script: {instanceID: 11560}
+      Script: {instanceID: 10852}
+    - Class: 114
+      Script: {instanceID: 10896}
+    - Class: 114
+      Script: {instanceID: 10910}
+    - Class: 114
+      Script: {instanceID: 11028}
+    - Class: 114
+      Script: {instanceID: 11150}
+    - Class: 114
+      Script: {instanceID: 11316}
+    - Class: 114
+      Script: {instanceID: 11520}
+    - Class: 114
+      Script: {instanceID: 11584}
     - Class: 115
       Script: {instanceID: 0}
     - Class: 128
@@ -319,7 +349,7 @@ ScriptsOnlyBuild:
     className: RawImage
   - hash:
       serializedVersion: 2
-      Hash: 8bb4123826bf736f780382b65abd8ab4
+      Hash: 465d14930b393282a856761654e190b9
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: InitializeLevel
@@ -331,7 +361,7 @@ ScriptsOnlyBuild:
     className: VerticalLayoutGroup
   - hash:
       serializedVersion: 2
-      Hash: 7216bfe6dd5d67578291852d7ea441be
+      Hash: 4a822def74f129b8d38a61308067e378
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: BlockProperties
@@ -383,6 +413,12 @@ ScriptsOnlyBuild:
     assemblyName: Unity.Timeline.dll
     namespaceName: UnityEngine.Timeline
     className: TimelineAsset
+  - hash:
+      serializedVersion: 2
+      Hash: 304b44760b695183e7e549c78f929e57
+    assemblyName: Assembly-CSharp.dll
+    namespaceName: 
+    className: MyGrid
   - hash:
       serializedVersion: 2
       Hash: 3b760e6526e13f7504f59e210145899a
@@ -505,7 +541,7 @@ ScriptsOnlyBuild:
     className: ToggleGroup
   - hash:
       serializedVersion: 2
-      Hash: 567ca6271bb80eb3acf289fed5688e74
+      Hash: 9df78eff44b58b9f732a0f1b4d5d0425
     assemblyName: Assembly-CSharp.dll
     namespaceName: 
     className: Manager
@@ -518,4 +554,4 @@ ScriptsOnlyBuild:
   platform: 13
   scenePathNames:
   - Assets/Scenes/GameScene.unity
-  playerPath: /Users/mac/Google Drive/PinokyoAdminPanel/New Unity Project/build03.apk
+  playerPath: /Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/build04.apk

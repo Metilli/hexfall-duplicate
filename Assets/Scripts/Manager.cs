@@ -64,29 +64,45 @@ public class Manager : MonoBehaviour
 
         highScoreText.text = "High Score: " + PlayerPrefs.GetFloat("HighScoreF").ToString();
     }
-
-    public IEnumerator DestroyBlocks(List<List<GameObject>> destroyList)
+    Coroutine dropDown;
+    Coroutine create;
+    public IEnumerator DestroyBlocksAgain(List<List<GameObject>> destroyList)
     {
+        yield return null;
+        
+    }
 
-        for (int i = 0; i < destroyList.Count; i++)
+    public void DestroyBlocks(List<GameObject> destroyList)
+    {
+        AddScore(destroyList);
+
+        for (int k = destroyList.Count - 1; k >= 0; k--)
         {
-            for (int k = destroyList[i].Count - 1; k >= 0; k--)
+            if (destroyList.Count > 0)
             {
-                AddScore(destroyList[i]);
-
-                grid.RemoveHexagonal(destroyList[i][k]);
+                grid.RemoveHexagonal(destroyList[k]);
             }
         }
-        
-        yield return StartCoroutine(DropBlockDown());
-        yield return StartCoroutine(CreateNewBlocks());
-        yield return new WaitForSeconds(dropTimeFromTop);
+    }
+
+    public IEnumerator MoveObjects() {
+
+        Coroutine dropDown = StartCoroutine(DropBlockDown());
+        yield return dropDown;
+        yield return new WaitForSeconds(dropTimeInGrid+0.5f);
+
+        Coroutine create =  StartCoroutine(CreateNewBlocks());
+        yield return create;
+        yield return new WaitForSeconds(dropTimeFromTop+0.5f);
+
         isDropping = false;
-        yield return StartCoroutine(CheckExplodeAfterDropBlock());
+        StartCoroutine(CheckExplodeAfterDropBlock());
+        yield return null;
     }
 
     public IEnumerator DropBlockDown()
     {
+        print("DropDown Started");
         isDropDownFinished = false;
         GameObject hexagonal;
         Vector2 targetCoordinate;
@@ -122,11 +138,14 @@ public class Manager : MonoBehaviour
             yield return new WaitForSeconds(dropTimeInGrid);
         }
         isDropDownFinished = true;
-        yield return null;
+        print("DropDown Finished");
+        yield break;
     }
 
     public IEnumerator CreateNewBlocks()
     {
+        print("Create Started");
+
         isCreateBlockFinished = false;
 
         List<GameObject> newBlocks = new List<GameObject>();
@@ -166,33 +185,43 @@ public class Manager : MonoBehaviour
         }
 
         isCreateBlockFinished = true;
-        yield return null;
+        print("Create Finished");
+
+        yield break;
     }
 
     public IEnumerator CheckExplodeAfterDropBlock()
     {
-        List<List<GameObject>> destroyList = new List<List<GameObject>>();
+        print("Checked Started");
+
+        isDropping = false;
+        bool isExplode = false;
+        List<GameObject> blocksWillDestroy = new List<GameObject>();
         for (int i = 0; i < grid.CellCountX; i++)
         {
             for (int j = 0; j < grid.CellCountY - 1; j++)
             {
                 Vector3 checkPosition = grid.gridPosition[i, j];
                 checkPosition.y -= grid.gridCellDistanceY / 2;
-                checkPosition.x -= grid.gridCellDistanceX / 2;
+                checkPosition.x += grid.gridCellDistanceX / 2;
 
                 List<GameObject> hexagonalGroup;
-                List<GameObject> blocksWillDestroy;
 
                 hexagonalGroup = FindNearestThreeBlock(checkPosition);
-                blocksWillDestroy = GetBlocksCanExplode(hexagonalGroup);
-
-                destroyList.Add(blocksWillDestroy);
+                blocksWillDestroy.AddRange(GetBlocksCanExplode(hexagonalGroup));
+                if (blocksWillDestroy.Count > 0)
+                {
+                    isExplode = true;
+                }
             }
         }
-        if (destroyList.Count > 0)
+        if (isExplode)
         {
-            StartCoroutine(DestroyBlocks(destroyList));
-            yield return null;
+            blocksWillDestroy= blocksWillDestroy.Distinct().ToList();
+            DestroyBlocks(blocksWillDestroy);
+            StartCoroutine(MoveObjects());
+            print("Destroy Started");
+            yield break;
         }
         else
         {
@@ -201,8 +230,9 @@ public class Manager : MonoBehaviour
             CreateSelectItem(selectedBlocks);
             isExplodedOnRotate = false;
             isDropping = false;
+            print("Checked Finished");
+            yield break;
         }
-        yield return null;
     }
 
     public List<GameObject> GetBlocksCanExplode(List<GameObject> centerBlocks)
@@ -282,7 +312,7 @@ public class Manager : MonoBehaviour
     {
         List<GameObject> nearestBlocks = new List<GameObject>();
 
-        List<GameObject> blocksGo = GameObject.FindGameObjectsWithTag("HexagonalBlock").ToList();
+        List<GameObject> blocksGo = grid.GridItemsToList();
         nearestBlocks = blocksGo.OrderBy(go => (go.transform.position - referencePos).sqrMagnitude).Take(3).ToList();
 
         while (!nearestBlocks[1].GetComponent<BlockProperties>().TouchingBlocks.Contains(nearestBlocks[2]))

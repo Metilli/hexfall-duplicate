@@ -184,19 +184,19 @@ public class BlockTouchHandler : MonoBehaviour
 
             SetBlockCoordinateOnRotate(manager.selectedBlocks,transformStartPositions, transformEndPositions);
 
-            List<List<GameObject>> upperList = new List<List<GameObject>>();
             List<GameObject> blocksWillDestroy;
             yield return blocksWillDestroy = manager.GetBlocksCanExplode(manager.selectedBlocks);
             if (blocksWillDestroy.Count > 0)
             {
-                upperList.Add(blocksWillDestroy);
                 manager.totalMoves++;
                 manager.totalMovesText.text = manager.totalMoves.ToString();
                 manager.DestroySelectItem();
-                StartCoroutine(manager.DestroyBlocks(upperList));
                 manager.isRotating = false;
                 manager.isExplodedOnRotate = true;
-                break;
+                manager.DestroyBlocks(blocksWillDestroy);
+                yield return new WaitForSeconds(0.02f);
+                StartCoroutine(manager.MoveObjects());
+                yield break;
             }
             yield return new WaitForSeconds(0.07f);
         }
