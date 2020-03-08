@@ -2,11 +2,10 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Manager.cs">
     <Files>
       <File FileName="Assets/Scripts/InitializeLevel.cs" Line="60" Column="1" />
-      <File FileName="Assets/Scripts/BlockTouchHandler.cs" Line="126" Column="40" />
-      <File FileName="Assets/Scripts/Manager.cs" Line="94" Column="52" />
-      <File FileName="Assets/Scripts/MyGrid.cs" Line="31" Column="1" />
-      <File FileName="Assets/Scripts/BlockProperties.cs" Line="39" Column="6" />
-      <File FileName="../../../../../Applications/Unity/Hub/Editor/2019.2.18f1/Unity.app/Contents/Resources/PackageManager/BuiltInPackages/com.unity.ugui/Runtime/UI/Core/CanvasUpdateRegistry.cs" Line="137" Column="1" />
+      <File FileName="Assets/Scripts/BlockTouchHandler.cs" Line="19" Column="91" />
+      <File FileName="Assets/Scripts/Manager.cs" Line="61" Column="41" />
+      <File FileName="Assets/Scripts/MyGrid.cs" Line="54" Column="1" />
+      <File FileName="Assets/Scripts/BlockProperties.cs" Line="11" Column="32" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -28,6 +27,8 @@
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Breakpoint file="/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Temp/UnityTempFile-5d53ce8cbd677432db7ef501f24dbdd0" relfile="Temp/UnityTempFile-5d53ce8cbd677432db7ef501f24dbdd0" line="99" column="32" />
+      <Breakpoint file="/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Assets/Scripts/raa54qda.evy~" relfile="Assets/Scripts/raa54qda.evy~" line="66" column="46" />
+      <Breakpoint file="/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Temp/UnityTempFile-15c9bc67f27a64061bf5f2c77b663455" relfile="Temp/UnityTempFile-15c9bc67f27a64061bf5f2c77b663455" line="103" column="6" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />

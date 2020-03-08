@@ -6,6 +6,7 @@ using System;
 public class InitializeLevel : MonoBehaviour
 {
     public GameObject hexagonalBlock { get; private set; }
+    public int HexagonWithStarRatio;
     public List<Color> ColorList;
 
     public Vector3 firstHexagonalPosition { get; private set; }
@@ -56,6 +57,11 @@ public class InitializeLevel : MonoBehaviour
                 GameObject hexagonelBlockClone = Instantiate(hexagonalBlock, clonePosition, Quaternion.identity);
 
                 hexagonelBlockClone.GetComponent<SpriteRenderer>().color = ColorList[random.Next(0, ColorList.Count)];
+                if (random.Next(0, 101) > 100 - HexagonWithStarRatio && HexagonWithStarRatio<=100 && HexagonWithStarRatio>=0)
+                {
+                    if(HexagonWithStarRatio != 0) hexagonelBlockClone.GetComponent<BlockProperties>().ChangeToStar();
+                }
+
                 hexagonelBlockClone.GetComponent<BlockProperties>().gridCoordinate = new Vector2(j,i);
 
                 grid.gridItems[j,i] = hexagonelBlockClone;
@@ -100,9 +106,9 @@ public class InitializeLevel : MonoBehaviour
         firstHexagonalPosition = new Vector2(startPosX, startPosY);
     }
 
-    IEnumerator ChangeColorOnInitialize(List<GameObject> blockList)
+    public IEnumerator ChangeColorOnInitialize(List<GameObject> blockList)
     {
-        yield return new WaitForSeconds(0.01f);
+        yield return new WaitForSeconds(0.05f);//Wait for all hexagonals to get touch list
         List<Color> tempColorList = new List<Color>();
         tempColorList.AddRange(ColorList);
         System.Random random = new System.Random();

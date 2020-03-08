@@ -11,12 +11,22 @@ public class BlockProperties : MonoBehaviour
     public int scoreMultiplier;
     public List<GameObject> TouchingBlocks = new List<GameObject>();
     public float LerpTime;
-    public Manager manager;
+    private CircleCollider2D circleCollider2D;
+
+    public bool hasStar;
+    public bool isBomb;
+
+    public int countDown;
+    public TextMesh bombText;
+
+    private Manager manager;
     float perc = 0;
 
     private void Awake()
     {
         manager = GameObject.Find("GameManager").GetComponent<Manager>();
+        circleCollider2D = gameObject.GetComponent<CircleCollider2D>();
+        bombText = gameObject.GetComponentInChildren<TextMesh>();
     }
 
     private void Update()
@@ -30,10 +40,43 @@ public class BlockProperties : MonoBehaviour
             }
             else
             {
+                circleCollider2D.enabled = true;
                 perc = 0;
                 isDropping = false;
             }
         }
+    }
+
+    public void Drop(float DropTime)
+    {
+        circleCollider2D.enabled = false;
+        LerpTime = DropTime;
+        isDropping = true;
+    }
+
+    public void ChangeToStar()
+    {
+        if (!isBomb)
+        {
+            scoreMultiplier = 2;
+            gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/hexagonStar");
+            hasStar = true;
+        }
+    }
+
+    public void ChangeToBomb()
+    {
+        scoreMultiplier = 1;
+        gameObject.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("Images/bomb");
+        bombText.text = countDown.ToString();
+        isBomb = true;
+    }
+
+    public void DeacreseCountdown()
+    {
+        countDown -= 1;
+        bombText.text = countDown.ToString();
+        if (countDown <= 0) manager.GameIsOver();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

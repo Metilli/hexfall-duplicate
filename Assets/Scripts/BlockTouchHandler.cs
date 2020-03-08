@@ -112,6 +112,7 @@ public class BlockTouchHandler : MonoBehaviour
                         }
                         else rotateDirection = RotateDirection.Clockwise;
                     }
+                    manager.isRotatedOnLastDrag = true;
 
                     StartCoroutine(RotateBlocksAndCheckExplode(rotateDirection, manager.blocksRotateTime));
                 }
@@ -161,20 +162,38 @@ public class BlockTouchHandler : MonoBehaviour
             var toAngle = Quaternion.Euler(manager.hexagonalCenterItemClone.transform.eulerAngles + rotateAngle);
             for (var t = 0f; t < 1; t += Time.deltaTime / rotateTime)
             {
+                for (int k = 0; k < manager.hexagonalCenterItemClone.transform.childCount; k++)
+                {
+                    if(manager.hexagonalCenterItemClone.transform.GetChild(k).GetComponent<BlockProperties>().isBomb == true ||
+                       manager.hexagonalCenterItemClone.transform.GetChild(k).GetComponent<BlockProperties>().hasStar == true)
+                        manager.hexagonalCenterItemClone.transform.GetChild(0).transform.rotation = Quaternion.Euler(0, 0, 0);
+                }
                 manager.hexagonalCenterItemClone.transform.rotation = Quaternion.Slerp(fromAngle, toAngle, t);
                 yield return null;
+            }
+
+            for (int k = 0; k < manager.hexagonalCenterItemClone.transform.childCount; k++)
+            {
+                if (manager.hexagonalCenterItemClone.transform.GetChild(k).GetComponent<BlockProperties>().isBomb == true ||
+                   manager.hexagonalCenterItemClone.transform.GetChild(k).GetComponent<BlockProperties>().hasStar == true)
+                    manager.hexagonalCenterItemClone.transform.GetChild(0).transform.rotation = Quaternion.Euler(0, 0, 0);
             }
             manager.hexagonalCenterItemClone.transform.rotation = toAngle;
 
             List<Vector2> transformEndPositions = getTransformPositions(manager.selectedBlocks);
 
             SetBlockCoordinateOnRotate(manager.selectedBlocks,transformStartPositions, transformEndPositions);
+
+            List<List<GameObject>> upperList = new List<List<GameObject>>();
             List<GameObject> blocksWillDestroy;
             yield return blocksWillDestroy = manager.GetBlocksCanExplode(manager.selectedBlocks);
             if (blocksWillDestroy.Count > 0)
             {
+                upperList.Add(blocksWillDestroy);
+                manager.totalMoves++;
+                manager.totalMovesText.text = manager.totalMoves.ToString();
                 manager.DestroySelectItem();
-                StartCoroutine(manager.DestroyBlocks(blocksWillDestroy));
+                StartCoroutine(manager.DestroyBlocks(upperList));
                 manager.isRotating = false;
                 manager.isExplodedOnRotate = true;
                 break;

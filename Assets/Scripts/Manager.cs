@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class Manager : MonoBehaviour
@@ -9,8 +10,13 @@ public class Manager : MonoBehaviour
     private InitializeLevel init;
     private MyGrid grid;
 
-    public int score = 0;
-    public int scoreConstant;
+    public float score = 0;
+    public float scoreConstant;
+    public int totalHexagonExploded = 0;
+    public int totalStarExploded = 0;
+    public int totalBombExploded = 0;
+    public int totalCombo = 0;
+    public int totalMoves = 0;
 
     public bool isRotating = false;
     public bool isRotatedOnLastDrag = false;
@@ -24,16 +30,25 @@ public class Manager : MonoBehaviour
     private GameObject hexagonalShade;
     private GameObject hexagonalCenterItem;
     private Text scoreText;
+    public Text totalMovesText;
     private Text highScoreText;
 
     private System.Random random;
 
     private float dropHeight;
-    public float dropWaitTimePerBlock;
+    public float dropWaitTimePerBlockFromTop;
+    public float dropWaitTimePerBlockInGrid;
+
     public float dropTimeFromTop;
     public float dropTimeInGrid;
 
+    public bool isDropDownFinished { get; set; }
+    public bool isCreateBlockFinished { get; set; }
 
+    private bool isBombCalled = false;
+    private float timesBombCalled = 0;
+
+    public GameObject GameOverPanel;
     // Start is called before the first frame update
     void Awake()
     {
@@ -45,24 +60,25 @@ public class Manager : MonoBehaviour
         hexagonalShade = Resources.Load<GameObject>("Prefabs/HexagonalShade");
         scoreText = GameObject.Find("CurrentScoreText").GetComponent<Text>();
         highScoreText = GameObject.Find("HighScoreText").GetComponent<Text>();
+        totalMovesText = GameObject.Find("MovesValue").GetComponent<Text>();
 
-        highScoreText.text = "High Score: " + PlayerPrefs.GetInt("HighScore").ToString();
+        highScoreText.text = "High Score: " + PlayerPrefs.GetFloat("HighScoreF").ToString();
     }
 
-    private void Update()
+    public IEnumerator DestroyBlocks(List<List<GameObject>> destroyList)
     {
-        
-    }
 
-    public IEnumerator DestroyBlocks(List<GameObject> destroyList)
-    {
-        StartCoroutine(AddScore(destroyList));
-        for (int k = destroyList.Count - 1; k >= 0; k--)
+        for (int i = 0; i < destroyList.Count; i++)
         {
-            grid.RemoveHexagonal(destroyList[k]);
+            for (int k = destroyList[i].Count - 1; k >= 0; k--)
+            {
+                AddScore(destroyList[i]);
+
+                grid.RemoveHexagonal(destroyList[i][k]);
+            }
         }
+        
         yield return StartCoroutine(DropBlockDown());
-        yield return new WaitForSeconds(dropTimeInGrid/2);
         yield return StartCoroutine(CreateNewBlocks());
         yield return new WaitForSeconds(dropTimeFromTop);
         isDropping = false;
@@ -71,8 +87,11 @@ public class Manager : MonoBehaviour
 
     public IEnumerator DropBlockDown()
     {
+        isDropDownFinished = false;
         GameObject hexagonal;
         Vector2 targetCoordinate;
+
+        List<GameObject> blockDropList = new List<GameObject>();
 
         for (int j = grid.CellCountY - 1; j >= 0; j--)
         {
@@ -85,28 +104,37 @@ public class Manager : MonoBehaviour
                 if (targetCoordinate == new Vector2(-1, -1)) continue;
 
                 grid.gridItems[(int)targetCoordinate.x, (int)targetCoordinate.y] = hexagonal;
+                grid.gridItems[i, j] = null;
 
                 hexagonal.GetComponent<BlockProperties>().targetPos = grid.gridPosition[(int)targetCoordinate.x,(int)targetCoordinate.y];
                 hexagonal.GetComponent<BlockProperties>().gridCoordinate = targetCoordinate;
                 hexagonal.GetComponent<BlockProperties>().LerpTime = dropTimeInGrid;
-                isDropping = true;
-                hexagonal.GetComponent<BlockProperties>().isDropping = true;
 
-                grid.gridItems[i, j] = null;
-                yield return new WaitForSeconds(dropWaitTimePerBlock);
+                blockDropList.Add(hexagonal);
             }
         }
+
+        isDropping = true;
+
+        for (int i = 0; i < blockDropList.Count; i++)
+        {
+            blockDropList[i].GetComponent<BlockProperties>().Drop(dropTimeInGrid);
+            yield return new WaitForSeconds(dropTimeInGrid);
+        }
+        isDropDownFinished = true;
         yield return null;
     }
 
     public IEnumerator CreateNewBlocks()
     {
+        isCreateBlockFinished = false;
+
+        List<GameObject> newBlocks = new List<GameObject>();
         dropHeight = Camera.main.orthographicSize + grid.gridCellDistanceY;
+
         List<Vector2> emptyGrids = grid.EmptyGridCoordinates();
         for (int i = emptyGrids.Count - 1; i >= 0; i--)
         {
-            yield return new WaitForSeconds(dropWaitTimePerBlock);
-
             Vector2 createPosition = grid.gridPosition[(int)emptyGrids[i].x, (int)emptyGrids[i].y];
             createPosition.y += dropHeight;
 
@@ -115,18 +143,35 @@ public class Manager : MonoBehaviour
             hexagonelBlockClone.GetComponent<SpriteRenderer>().color = init.ColorList[random.Next(0, init.ColorList.Count)];
             hexagonelBlockClone.GetComponent<BlockProperties>().gridCoordinate = new Vector2(emptyGrids[i].x, emptyGrids[i].y);
             hexagonelBlockClone.GetComponent<BlockProperties>().targetPos = grid.gridPosition[(int)emptyGrids[i].x, (int)emptyGrids[i].y];
-            hexagonelBlockClone.GetComponent<BlockProperties>().LerpTime = dropTimeFromTop;
             grid.gridItems[(int)emptyGrids[i].x, (int)emptyGrids[i].y] = hexagonelBlockClone;
-            isDropping = true;
 
-            hexagonelBlockClone.GetComponent<BlockProperties>().isDropping = true;
+            if (isBombCalled)
+            {
+                hexagonelBlockClone.GetComponent<BlockProperties>().ChangeToBomb();
+                isBombCalled = false;
+            }
+            else if (random.Next(0, 101) > 100 - init.HexagonWithStarRatio && init.HexagonWithStarRatio <= 100 && init.HexagonWithStarRatio >= 0)
+            {
+                if (init.HexagonWithStarRatio != 0) hexagonelBlockClone.GetComponent<BlockProperties>().ChangeToStar();
+            }
+            
+            newBlocks.Add(hexagonelBlockClone);
         }
+        yield return StartCoroutine(init.ChangeColorOnInitialize(newBlocks));
+        isDropping = true;
+        for (int i = 0; i < newBlocks.Count; i++)
+        {
+            newBlocks[i].GetComponent<BlockProperties>().Drop(dropTimeFromTop);
+            yield return new WaitForSeconds(dropWaitTimePerBlockFromTop);
+        }
+
+        isCreateBlockFinished = true;
         yield return null;
     }
 
     public IEnumerator CheckExplodeAfterDropBlock()
     {
-        List<GameObject> destroyList = new List<GameObject>();
+        List<List<GameObject>> destroyList = new List<List<GameObject>>();
         for (int i = 0; i < grid.CellCountX; i++)
         {
             for (int j = 0; j < grid.CellCountY - 1; j++)
@@ -135,13 +180,13 @@ public class Manager : MonoBehaviour
                 checkPosition.y -= grid.gridCellDistanceY / 2;
                 checkPosition.x -= grid.gridCellDistanceX / 2;
 
-                List<GameObject> hexagonalGroup = new List<GameObject>();
-                List<GameObject> blocksWillDestroy = new List<GameObject>();
+                List<GameObject> hexagonalGroup;
+                List<GameObject> blocksWillDestroy;
 
                 hexagonalGroup = FindNearestThreeBlock(checkPosition);
                 blocksWillDestroy = GetBlocksCanExplode(hexagonalGroup);
 
-                destroyList.AddRange(blocksWillDestroy);
+                destroyList.Add(blocksWillDestroy);
             }
         }
         if (destroyList.Count > 0)
@@ -151,9 +196,11 @@ public class Manager : MonoBehaviour
         }
         else
         {
+            TriggerBomb();
             selectedBlocks = FindNearestThreeBlock(rotateStartPosition);
             CreateSelectItem(selectedBlocks);
             isExplodedOnRotate = false;
+            isDropping = false;
         }
         yield return null;
     }
@@ -175,6 +222,19 @@ public class Manager : MonoBehaviour
                     {
                         if (sameColor1stBlocksToCenter.Contains(sameColor1stBlocksToOthers[k]))
                         {
+                            if ((centerBlocks[i].GetComponent<BlockProperties>().isBomb
+                                && (sameColor1stBlocksToOthers[j].GetComponent<BlockProperties>().hasStar
+                                || sameColor1stBlocksToCenter[j].GetComponent<BlockProperties>().hasStar))
+
+                                ||
+
+                                (centerBlocks[i].GetComponent<BlockProperties>().hasStar
+                                && (sameColor1stBlocksToOthers[j].GetComponent<BlockProperties>().isBomb
+                                || sameColor1stBlocksToCenter[j].GetComponent<BlockProperties>().isBomb)))
+                            {
+                                    blocksCanExplode.AddRange(grid.GetAllIBlocksWithSameColor(centerBlocks[i].GetComponent<SpriteRenderer>().color));
+                                totalCombo++;
+                            }
                             blocksCanExplode.Add(centerBlocks[i]);
                             blocksCanExplode.Add(sameColor1stBlocksToCenter[j]);
                             blocksCanExplode.Add(sameColor1stBlocksToOthers[k]);
@@ -217,10 +277,6 @@ public class Manager : MonoBehaviour
             selectedBlocks[i].transform.parent = hexagonalCenterItemClone.transform;
         }
     }
-
-    
-
-    
 
     public List<GameObject> FindNearestThreeBlock(Vector3 referencePos)
     {
@@ -267,18 +323,54 @@ public class Manager : MonoBehaviour
         return sameColorWithBlockToCheck;
     }
 
-    public IEnumerator AddScore(List<GameObject> explodedBlocks)
+    public void TriggerBomb()
     {
-        for (int i = 0; i < explodedBlocks.Count; i++)
+        List<GameObject> allBlocks =  grid.GridItemsToList();
+        for (int i = 0; i < allBlocks.Count; i++)
         {
-            score += scoreConstant * explodedBlocks[i].GetComponent<BlockProperties>().scoreMultiplier;
+            if (allBlocks[i].GetComponent<BlockProperties>().isBomb) allBlocks[i].GetComponent<BlockProperties>().DeacreseCountdown();
         }
-        scoreText.text = "Score: " + score;
-        if (PlayerPrefs.GetInt("HighScore") < score)
+    }
+
+    public void GameIsOver()
+    {
+        StopAllCoroutines();
+        List<GameObject> allBlocks = grid.GridItemsToList();
+        for (int i = allBlocks.Count - 1; i >= 0; i--)
         {
-            PlayerPrefs.SetInt("HighScore", score);
+            Destroy(allBlocks[i]);
+
+        }
+        GameOverPanel.SetActive(true);
+        GameObject.Find("BlocksDestroyedText").GetComponent<Text>().text = "Blocks destroyed: x" + totalHexagonExploded;
+        GameObject.Find("CombosText").GetComponent<Text>().text = "Combos : x" + totalCombo;
+        GameObject.Find("BombsText").GetComponent<Text>().text = "Bombs : x" + totalBombExploded;
+        GameObject.Find("ScoreText").GetComponent<Text>().text = "Score : " + score;
+    }
+
+    public void Retry()
+    {
+        SceneManager.LoadScene(0);
+    }
+
+    public void AddScore(List<GameObject> blocks)
+    {
+        float groupScore=0;
+        for (int i = 0; i < blocks.Count; i++)
+        {
+            groupScore += scoreConstant * blocks[i].GetComponent<BlockProperties>().scoreMultiplier;
+        }
+        score += groupScore;
+        scoreText.text = "Score: " + score;
+        if (score >= 1000 * (timesBombCalled + 1))
+        {
+            timesBombCalled++;
+            isBombCalled = true;
+        }
+        if (PlayerPrefs.GetFloat("HighScoreF") < score)
+        {
+            PlayerPrefs.SetFloat("HighScoreF", score);
             highScoreText.text = "High Score: " + score;
         }
-        yield return null;
     }
 }

@@ -11,11 +11,14 @@ public class MyGrid : MonoBehaviour
     public readonly float gridCellDistanceX = 3.9f;
     public readonly float gridCellDistanceY = 4.6f;
 
+    private Manager manager;
+
     // Start is called before the first frame update
     void Awake()
     {
-        gridPosition = new Vector2[CellCountX,CellCountY];
+        gridPosition = new Vector2[CellCountX, CellCountY];
         gridItems = new GameObject[CellCountX, CellCountY];
+        manager = GameObject.Find("GameManager").GetComponent<Manager>();
     }
 
     public void AddHexagonal(GameObject hexagonal)
@@ -29,12 +32,17 @@ public class MyGrid : MonoBehaviour
         int y = (int)hexagonal.GetComponent<BlockProperties>().gridCoordinate.y;
 
         gridItems[x, y] = null;
+
+        manager.totalHexagonExploded++;
+        if (hexagonal.GetComponent<BlockProperties>().hasStar) manager.totalStarExploded++;
+        if (hexagonal.GetComponent<BlockProperties>().isBomb) manager.totalBombExploded++;
+
         Destroy(hexagonal);
     }
 
     public Vector2 GetDropCoordinate(GameObject hexagonalBlock)
     {
-        Vector2 DropCoordinate = new Vector2(-1,-1) ;
+        Vector2 DropCoordinate = new Vector2(-1, -1);
         if (hexagonalBlock != null)
         {
             int x = (int)hexagonalBlock.GetComponent<BlockProperties>().gridCoordinate.x;
@@ -63,6 +71,19 @@ public class MyGrid : MonoBehaviour
         return list;
     }
 
+    public List<GameObject> GetAllIBlocksWithSameColor(Color color)
+    {
+        List<GameObject> list = new List<GameObject>();
+        for (int i = 0; i < CellCountX; i++)
+        {
+            for (int j = 0; j < CellCountY; j++)
+            {
+                if(gridItems[i, j].GetComponent<SpriteRenderer>().color == color) list.Add(gridItems[i, j]);
+            }
+        }
+        return list;
+    }
+
     public List<GameObject> GridItemsToList()
     {
         List<GameObject> list = new List<GameObject>();
@@ -70,7 +91,7 @@ public class MyGrid : MonoBehaviour
         {
             for (int j = 0; j < CellCountY; j++)
             {
-                list.Add(gridItems[i,j]);
+                list.Add(gridItems[i, j]);
             }
         }
         return list;
