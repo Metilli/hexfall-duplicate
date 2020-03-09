@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -193,9 +193,7 @@ public class BlockTouchHandler : MonoBehaviour
                 manager.DestroySelectItem();
                 manager.isRotating = false;
                 manager.isExplodedOnRotate = true;
-                manager.DestroyBlocks(blocksWillDestroy);
-                yield return new WaitForSeconds(0.02f);
-                StartCoroutine(manager.MoveObjects());
+                yield return StartCoroutine(manager.DestroyBlocks(blocksWillDestroy));
                 yield break;
             }
             yield return new WaitForSeconds(0.07f);

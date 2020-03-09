@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -64,15 +64,8 @@ public class Manager : MonoBehaviour
 
         highScoreText.text = "High Score: " + PlayerPrefs.GetFloat("HighScoreF").ToString();
     }
-    Coroutine dropDown;
-    Coroutine create;
-    public IEnumerator DestroyBlocksAgain(List<List<GameObject>> destroyList)
-    {
-        yield return null;
-        
-    }
 
-    public void DestroyBlocks(List<GameObject> destroyList)
+    public IEnumerator DestroyBlocks(List<GameObject> destroyList)
     {
         AddScore(destroyList);
 
@@ -83,21 +76,22 @@ public class Manager : MonoBehaviour
                 grid.RemoveHexagonal(destroyList[k]);
             }
         }
+        yield return null;
+        StartCoroutine(MoveObjects());
     }
 
     public IEnumerator MoveObjects() {
 
         Coroutine dropDown = StartCoroutine(DropBlockDown());
         yield return dropDown;
-        yield return new WaitForSeconds(dropTimeInGrid+0.5f);
+        yield return new WaitForSeconds(dropTimeInGrid);
 
         Coroutine create =  StartCoroutine(CreateNewBlocks());
         yield return create;
-        yield return new WaitForSeconds(dropTimeFromTop+0.5f);
+        yield return new WaitForSeconds(dropTimeFromTop);
 
         isDropping = false;
-        StartCoroutine(CheckExplodeAfterDropBlock());
-        yield return null;
+        yield return StartCoroutine(CheckExplodeAfterDropBlock());
     }
 
     public IEnumerator DropBlockDown()
@@ -218,9 +212,8 @@ public class Manager : MonoBehaviour
         if (isExplode)
         {
             blocksWillDestroy= blocksWillDestroy.Distinct().ToList();
-            DestroyBlocks(blocksWillDestroy);
-            StartCoroutine(MoveObjects());
             print("Destroy Started");
+            yield return StartCoroutine(DestroyBlocks(blocksWillDestroy));
             yield break;
         }
         else

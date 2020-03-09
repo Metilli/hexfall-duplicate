@@ -1,5 +1,5 @@
 #Internal package file, do not edit.
-#Sun Mar 08 10:39:41 EET 2020
+#Mon Mar 09 21:09:30 EET 2020
 124.path=bin/Data/Managed/UnityEngine.UI.dll
 60.set=ASSET
 52.set=ASSET

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -11,8 +11,8 @@ public class InitializeLevel : MonoBehaviour
 
     public Vector3 firstHexagonalPosition { get; private set; }
     private readonly float referenceCameraSize = 40f;
-    private readonly float referenceCameraAspectRatio = 1080f/1920f;
-    
+    private readonly float referenceCameraAspectRatio = 1080f / 1920f;
+
     private Manager Manager;
     private MyGrid grid;
     private System.Random random;
@@ -37,7 +37,7 @@ public class InitializeLevel : MonoBehaviour
         StartCoroutine(ChangeColorOnInitialize(grid.GridItemsToList()));
     }
 
-   void CreateFirstBlocksAndFillGridProperties()
+    void CreateFirstBlocksAndFillGridProperties()
     {
         float yPosOfHexagonal;
         float xPosOfHexagonal;
@@ -57,14 +57,14 @@ public class InitializeLevel : MonoBehaviour
                 GameObject hexagonelBlockClone = Instantiate(hexagonalBlock, clonePosition, Quaternion.identity);
 
                 hexagonelBlockClone.GetComponent<SpriteRenderer>().color = ColorList[random.Next(0, ColorList.Count)];
-                if (random.Next(0, 101) > 100 - HexagonWithStarRatio && HexagonWithStarRatio<=100 && HexagonWithStarRatio>=0)
+                if (random.Next(0, 101) > 100 - HexagonWithStarRatio && HexagonWithStarRatio <= 100 && HexagonWithStarRatio >= 0)
                 {
-                    if(HexagonWithStarRatio != 0) hexagonelBlockClone.GetComponent<BlockProperties>().ChangeToStar();
+                    if (HexagonWithStarRatio != 0) hexagonelBlockClone.GetComponent<BlockProperties>().ChangeToStar();
                 }
 
-                hexagonelBlockClone.GetComponent<BlockProperties>().gridCoordinate = new Vector2(j,i);
+                hexagonelBlockClone.GetComponent<BlockProperties>().gridCoordinate = new Vector2(j, i);
 
-                grid.gridItems[j,i] = hexagonelBlockClone;
+                grid.gridItems[j, i] = hexagonelBlockClone;
                 grid.gridPosition[j, i] = clonePosition;
             }
         }
@@ -85,7 +85,7 @@ public class InitializeLevel : MonoBehaviour
 
         float blocksOffsetYRatioFromTop = 0.3f;
         float blocksOffsetYRatioFromBottom = 0.15f;
-        float blocksOffsetYRatioTotal = (1+blocksOffsetYRatioFromTop+blocksOffsetYRatioFromBottom);
+        float blocksOffsetYRatioTotal = (1 + blocksOffsetYRatioFromTop + blocksOffsetYRatioFromBottom);
         float hexagonelTotalBlockHeight = grid.CellCountY * grid.gridCellDistanceY;
         float cameraSizeDependsOnHeight = hexagonelTotalBlockHeight * blocksOffsetYRatioTotal;
 
@@ -132,5 +132,5 @@ public class InitializeLevel : MonoBehaviour
         }
     }
 
-   
+
 }

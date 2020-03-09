@@ -1,10 +1,10 @@
 ﻿<Properties StartupConfiguration="{2BFBCD3F-3FC2-40BC-4E33-7B67CEB28127}|">
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Manager.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/BlockTouchHandler.cs">
     <Files>
       <File FileName="Assets/Scripts/InitializeLevel.cs" Line="60" Column="1" />
-      <File FileName="Assets/Scripts/BlockTouchHandler.cs" Line="196" Column="46" />
-      <File FileName="Assets/Scripts/Manager.cs" Line="213" Column="17" />
-      <File FileName="Assets/Scripts/MyGrid.cs" Line="54" Column="1" />
+      <File FileName="Assets/Scripts/BlockTouchHandler.cs" Line="26" Column="25" />
+      <File FileName="Assets/Scripts/Manager.cs" />
+      <File FileName="Assets/Scripts/MyGrid.cs" />
       <File FileName="Assets/Scripts/BlockProperties.cs" />
     </Files>
     <Pads>
@@ -13,7 +13,7 @@
           <Node name="hexfall-duplicate" expanded="True">
             <Node name="Assets" expanded="True">
               <Node name="Scripts" expanded="True">
-                <Node name="Manager.cs" selected="True" />
+                <Node name="BlockTouchHandler.cs" selected="True" />
               </Node>
             </Node>
           </Node>
@@ -23,12 +23,13 @@
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="06593b73-89f9-42cc-9829-da75bf25cf3f" />
+  <MonoDevelop.Ide.ItemProperties.Assembly-CSharp PreferredExecutionTarget="990484be-d34f-4096-8b08-db84bbd4559e" />
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
       <Breakpoint file="/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Temp/UnityTempFile-5d53ce8cbd677432db7ef501f24dbdd0" relfile="Temp/UnityTempFile-5d53ce8cbd677432db7ef501f24dbdd0" line="99" column="32" />
       <Breakpoint file="/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Assets/Scripts/raa54qda.evy~" relfile="Assets/Scripts/raa54qda.evy~" line="66" column="46" />
       <Breakpoint file="/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Temp/UnityTempFile-15c9bc67f27a64061bf5f2c77b663455" relfile="Temp/UnityTempFile-15c9bc67f27a64061bf5f2c77b663455" line="103" column="6" />
+      <Breakpoint file="/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Temp/UnityTempFile-172ff0507f3624f51acde6779972d4fb" relfile="Temp/UnityTempFile-172ff0507f3624f51acde6779972d4fb" line="387" column="25" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
