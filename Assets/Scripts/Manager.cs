@@ -76,8 +76,7 @@ public class Manager : MonoBehaviour
                 grid.RemoveHexagonal(destroyList[k]);
             }
         }
-        yield return null;
-        StartCoroutine(MoveObjects());
+        yield return StartCoroutine(MoveObjects());
     }
 
     public IEnumerator MoveObjects() {
@@ -213,7 +212,7 @@ public class Manager : MonoBehaviour
         {
             blocksWillDestroy= blocksWillDestroy.Distinct().ToList();
             print("Destroy Started");
-            yield return StartCoroutine(DestroyBlocks(blocksWillDestroy));
+            StartCoroutine(DestroyBlocks(blocksWillDestroy));
             yield break;
         }
         else
@@ -379,9 +378,10 @@ public class Manager : MonoBehaviour
     public void AddScore(List<GameObject> blocks)
     {
         float groupScore=0;
+        groupScore += scoreConstant * blocks.Count;
         for (int i = 0; i < blocks.Count; i++)
         {
-            groupScore += scoreConstant * blocks[i].GetComponent<BlockProperties>().scoreMultiplier;
+            groupScore *= blocks[i].GetComponent<BlockProperties>().scoreMultiplier;
         }
         score += groupScore;
         scoreText.text = "Score: " + score;

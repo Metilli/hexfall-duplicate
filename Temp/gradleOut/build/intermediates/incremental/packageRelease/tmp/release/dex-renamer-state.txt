@@ -1,4 +1,4 @@
-#Mon Mar 09 21:09:30 EET 2020
+#Mon Mar 09 21:43:20 EET 2020
 base.0=/Users/mac/Google Drive/HexfallDuplicate/hexfall-duplicate/Temp/gradleOut/build/intermediates/transforms/dexMerger/release/0
 path.0=classes.dex
 renamed.0=classes.dex
